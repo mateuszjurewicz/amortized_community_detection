@@ -158,10 +158,10 @@ class ACP_Model(nn.Module):
         N = len(labels)
 
         _, cluster_counts = torch.unique(
-            labels, sorted=True, return_counts=True)
+            labels, sorted=True, return_counts=True)  # TODO: Cluster counts is the number of elements per cluster, in order
         K = len(cluster_counts)
         all_anchors, all_targets, all_unassigned, all_last_assigned = get_ATUS(
-            cluster_counts, device=device)
+            cluster_counts, device=device)  # TODO: these are teacher-forced indices of all initial cluster points, all available points, all points currently assigned and the target binary vector at each k-th step
         loss = 0
         elbo = 0
 
@@ -170,7 +170,7 @@ class ACP_Model(nn.Module):
 
         # sort the nodes by labels for CCP
         sorted_ind = torch.argsort(labels)
-        labels = labels[sorted_ind]
+        labels = labels[sorted_ind]  # TODO: no idea what this achieves, seems to not change labels at all
         enc_data = enc_data[:, sorted_ind]
 
         G = None
@@ -241,6 +241,10 @@ class ACP_Model(nn.Module):
         # (batch_size, max_K, max_N)
 
         enc_data_raw = self.encoder(data)  # [total_N, e_dim]
+
+        # TODO: had to flatten manually here, not sure why
+        enc_data_raw = torch.flatten(enc_data_raw, 0, 1)
+
         enc_data_raw = enc_data_raw.split(Ns, dim=0)  # split the batch
 
         # stack the encoded data into the same batch tensor with padding

@@ -41,7 +41,7 @@ class ACP_Sampler():
             cs: tensor of samples, shape = [Ss,N], where Ss <= S, because duplicates are eliminated
             probs: estimated probabilities of the Ss samples 
         """
-        ccs = self._sample(S=S, sample_Z=sample_Z, sample_B=sample_B)
+        ccs = self._sample(S=S, sample_Z=sample_Z, sample_B=sample_B)  # TODO: I think this is the function used to infer from a trained model
         cs, probs = self._estimate_probs(ccs, nZ=prob_nZ, nA=prob_nA)
 
         return cs, probs
@@ -145,7 +145,7 @@ class ACP_Sampler():
                 # so if a point was available before sampling and survived, it should be available in mask
                 mask[:t, :] = mask[:t, :]*mask_update
 
-                new_cluster = (cs[:t, :] == k).float()
+                new_cluster = (cs[:t, :] == k).float()  # TODO: new cluster is just 1s and 0s over N, where 1 is at indices of points in the current cluster
                 if self.model.use_attn:
                     new_Hs = self.model.pma_h(
                         big_hs[:t], new_cluster).squeeze(1)
@@ -156,7 +156,7 @@ class ACP_Sampler():
 
                 G[:t] = G[:t] + self.model.g(new_Hs)
 
-                msum = mask[:t, :].sum(dim=1)
+                msum = mask[:t, :].sum(dim=1)  # TODO: msum is the number of still available points (ones that have a 1 at their index in the mask)
                 if (msum == 0).any():                # if any thread was fully sampled
                     msumfull = mask.sum(dim=1)
 

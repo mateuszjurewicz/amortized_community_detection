@@ -12,31 +12,31 @@ import torch_geometric
 import dgl
 
 from sklearn.metrics import adjusted_mutual_info_score
-from ..utils.sbm_utils import plot_colored_adj_matrix_with_prediction
-from ..utils.plotting import DEFAULT_COLORS
+from acp.utils.sbm_utils import plot_colored_adj_matrix_with_prediction
+from acp.utils.plotting import DEFAULT_COLORS
 
-from ..data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
+from acp.data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
 
-from ..data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
-from ..data_generator.utils import remap_labels_by_cluster_size
+from acp.data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
+from acp.data_generator.utils import remap_labels_by_cluster_size
 
-from ..encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
-from ..encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
+from acp.encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
+from acp.encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
 
-from ..models.acp_model import ACP_Model
-from ..models.acp_sampler import ACP_Sampler
+from acp.models.acp_model import ACP_Model
+from acp.models.acp_sampler import ACP_Sampler
 
-from ..utils.graph_utils import edge_list_to_adj_matrix
+from acp.utils.graph_utils import edge_list_to_adj_matrix
 
 parser = argparse.ArgumentParser(
     description='Run ACP inference for SBM graphs.')
-parser.add_argument('--data_type', type=str, default=None,
+parser.add_argument('--data_type', type=str, default="sbm_beta_crp",
                     help="(required) data generator type.")
-parser.add_argument('--encoder_type', type=str, default=None,
+parser.add_argument('--encoder_type', type=str, default="graphsage",
                     help="(required) encoder type.")
 parser.add_argument('--load_model_def', type=str, default="",
                     help="(optional) alternative .py file of acp_model definition")
-parser.add_argument('--model_file', type=str, default=None,
+parser.add_argument('--model_file', type=str, default="/Users/mateuszjurewicz/Documents/PhD/PhD Generative Data/scripts/amortized_community_detection/saved_models/sbm_beta_crp_acp_model_graphsage_encoder_acp_1000.pt",
                     help="(required) the file path of the trained model checkpoint.")
 parser.add_argument('--load_sampler_def', type=str, default="",
                     help="(optional) alternative .py file of acp_sampler definition")
@@ -47,11 +47,11 @@ parser.add_argument('--out_dir', type=str, default="outputs",
 parser.add_argument('--gpu', type=int, default=0,
                     help="gpu id.")
 parser.add_argument('--S', type=int, default=10,
-                    help="how many parallel samples.")
+                    help="how many parallel samples. Default 10.")
 parser.add_argument('--prob_nZ', type=int, default=1,
-                    help="how many Z to sample when estimating probability.")
+                    help="how many Z to sample when estimating probability. Default is 1")
 parser.add_argument('--prob_nA', type=int, default=10,
-                    help="how many anchors to sample when estimating probability.")
+                    help="how many anchors to sample when estimating probability. Default is 10")
 parser.add_argument('--use_train_data_params', action="store_true",
                     help="whether to use the data_params saved in model checkpoint.")
 
@@ -205,4 +205,6 @@ def load_module(filename):
 
 
 if __name__ == "__main__":
+    from os import getcwd
+    print(getcwd())
     main()

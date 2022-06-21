@@ -79,10 +79,34 @@ class MOG_Generator():
 
         return data, labels
 
-    def generate_batch(self, batch_size, device, data_lib=None):
-        data, labels = self.generate(N=None, batch_size=batch_size)
+    def generate_batch(self, batch_size, device, data_lib=None, n=None):
+        data, labels = self.generate(N=n, batch_size=batch_size)
         sorted_ind = torch.argsort(labels)
         labels = labels[sorted_ind].to(device)
         data = data[:, sorted_ind]
         data = data.to(device)
         return data, labels
+
+    def generate_batch_mixed(self, batch_size, device, data_lib=None, n=None):
+        """
+        Generate a batch where there are as many labels as there are examples, and there
+        is no enforced consistency between them, e.g. one example can have 4 target clusters and
+        another can have 2 etc. To be used with forward_train_masked().
+        """
+        data_mixed_batch = []
+        labels_mixed_batch = []
+        for _ in range(batch_size):
+            data, labels = self.generate(N=n, batch_size=1)
+            sorted_ind = torch.argsort(labels)
+            labels = labels[sorted_ind].to(device)
+            data = data[:, sorted_ind]
+            data = data.to(device)
+
+            # append
+            data_mixed_batch.append(data)
+            labels_mixed_batch.append(labels)
+
+        # data is expected as one tensor
+        data_mixed_batch = torch.cat(data_mixed_batch, dim=0)
+
+        return data_mixed_batch, labels_mixed_batch

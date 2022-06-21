@@ -6,29 +6,30 @@ import argparse
 import importlib
 import torch
 import numpy as np
+import random
 
-from .data_config.mog_data_config import mog_data_params
-from .config.mog_acp_config import mog_acp_params
-from .data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
-from .config.sbm_acp_config import sbm_acp_params
-from .models.acp_model import ACP_Model
+from acp.data_config.mog_data_config import mog_data_params
+from acp.config.mog_acp_config import mog_acp_params
+from acp.data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
+from acp.config.sbm_acp_config import sbm_acp_params
+from acp.models.acp_model import ACP_Model
 
-from .data_generator.mog_generator import get_mog_crp_generator
-from .data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
+from acp.data_generator.mog_generator import get_mog_crp_generator
+from acp.data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
 
-from .encoders.mog_encoder import get_mog_encoder
-from .encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
-from .encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
+from acp.encoders.mog_encoder import get_mog_encoder
+from acp.encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
+from acp.encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
 
-from .utils.plotting import plot_stats
+from acp.utils.plotting import plot_stats
 
 parser = argparse.ArgumentParser(description="Train ACP model.")
-parser.add_argument('--model_name', type=str, default="",
-                    help="Model name")
-parser.add_argument('--data_type', type=str, default="",
-                    help="type of data for training")
-parser.add_argument('--encoder_type', type=str, default="",
-                    help="type of encoder")
+parser.add_argument('--model_name', type=str, default="mog",
+                    help="Model name ['mog', 'acp']")
+parser.add_argument('--data_type', type=str, default="mog",
+                    help="type of data for training ['mog', 'sbm_beta_crp']")
+parser.add_argument('--encoder_type', type=str, default="mog",
+                    help="type of encoder ['mog', 'graphsage', 'gatedgcn']")
 parser.add_argument('--load_model_def', type=str, default="",
                     help="optional alternative .py file of acp_model definition")
 parser.add_argument('--n_iter', type=int, default=10000,
@@ -165,9 +166,15 @@ def train_acp():
         t_start = time.time()
         it += 1
 
-        # generate a new batch of data
-        data, labels = data_generator.generate_batch(
-            batch_size=batch_size, data_lib=data_lib, device=device)
+        # # generate a new batch of data
+        # data, labels = data_generator.generate_batch(
+        #     batch_size=batch_size, data_lib=data_lib, device=device)
+
+        # TODO: adding generation of jagged batched, within Nmin and Nmax
+        data, labels = data_generator.generate_batch_mixed(
+            batch_size=batch_size, data_lib=data_lib, device=device, n=random.randint(data_params['Nmin'],
+                                                                                      data_params['Nmax'])
+        )
 
         try:
             # if args.data_type in ["benchmarking_gnn"]:
@@ -181,7 +188,7 @@ def train_acp():
                 N = len(labels)
                 K = len(torch.unique(labels))
                 loss, elbo = model.forward_train(
-                    data, labels, w=acp_vae_samples)
+                    data, labels, w=acp_vae_samples) # TODO: acp_vae_samples is just a chosen integer, for how many samples to generate? e.g. 40
 
             loss.backward()
 
@@ -194,8 +201,8 @@ def train_acp():
 
             lr_curr = optimizer.param_groups[0]['lr']
             if it % args.print_every == 0:
-                print('{0}  N:{1:3d}  K:{2}  ELBO:{3:4.3f}  Loss:{4:.3f}  Time/Iter: {5:.1f}  lr: {6}'
-                      .format(it, N, K, np.mean(elbos[-50:]), np.mean(losses[-50:]), (time.time()-t_start), lr_curr))
+                print('{0:<5}  N: {1:<5}  K: {2:<5}  ELBO: {3:<10.3f}  Loss: {4:<10.3f}  Time/Iter: {5:<10.1f} Time/N: {6:<10.3f} lr: {7}'
+                      .format(it, N, K, np.mean(elbos[-50:]), np.mean(losses[-50:]), (time.time()-t_start), (time.time()-t_start) / N, lr_curr))
 
         except RuntimeError as error:
             del data, labels, loss, elbo
