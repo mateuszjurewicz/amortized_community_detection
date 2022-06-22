@@ -10,16 +10,16 @@ import random
 
 from acp.data_config.mog_data_config import mog_data_params
 from acp.config.mog_acp_config import mog_acp_params
-from acp.data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
-from acp.config.sbm_acp_config import sbm_acp_params
+# from acp.data_config.sbm_data_beta_crp_config import sbm_data_beta_crp_params
+# from acp.config.sbm_acp_config import sbm_acp_params
 from acp.models.acp_model import ACP_Model
 
 from acp.data_generator.mog_generator import get_mog_crp_generator
-from acp.data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
+# from acp.data_generator.sbm_beta_generator import get_sbm_beta_crp_generator
 
 from acp.encoders.mog_encoder import get_mog_encoder
-from acp.encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
-from acp.encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
+# from acp.encoders.sbm_graphsage_encoder import get_sbm_graph_sage_encoder
+# from acp.encoders.sbm_gatedgcn_dgl_encoder import get_sbm_gated_gcn_dgl_encoder
 
 from acp.utils.plotting import plot_stats
 
@@ -56,10 +56,10 @@ def train_acp():
         params = mog_acp_params
         get_data_generator = get_mog_crp_generator
 
-    elif args.data_type == "sbm_beta_crp":
-        data_params = sbm_data_beta_crp_params
-        params = sbm_acp_params
-        get_data_generator = get_sbm_beta_crp_generator
+    # elif args.data_type == "sbm_beta_crp":
+    #     data_params = sbm_data_beta_crp_params
+    #     params = sbm_acp_params
+    #     get_data_generator = get_sbm_beta_crp_generator
 
     else:
         raise ValueError("Unknown data type: " + args.data_type)
@@ -71,27 +71,27 @@ def train_acp():
         get_encoder = get_mog_encoder
         data_lib = None
 
-    elif args.encoder_type == "graphsage":
-        encoder_params = {
-            "enc_in_dim": 20,  # orignal_feature + random_feature or pos_enc dim
-            "enc_out_dim": params['e_dim'],
-            "enc_hidden_dim": 128,
-            "enc_layers": 4,
-            "enc_dropout": 0}
-        params.update(encoder_params)
-        get_encoder = get_sbm_graph_sage_encoder
-        data_lib = "torch_geom"
+    # elif args.encoder_type == "graphsage":
+    #     encoder_params = {
+    #         "enc_in_dim": 20,  # orignal_feature + random_feature or pos_enc dim
+    #         "enc_out_dim": params['e_dim'],
+    #         "enc_hidden_dim": 128,
+    #         "enc_layers": 4,
+    #         "enc_dropout": 0}
+    #     params.update(encoder_params)
+    #     get_encoder = get_sbm_graph_sage_encoder
+    #     data_lib = "torch_geom"
 
-    elif args.encoder_type == "gatedgcn":
-        encoder_params = {
-            "enc_in_dim": 20,  # orignal_feature + random_feature or pos_enc dim
-            "enc_hidden_dim": 128,
-            "enc_out_dim": params['e_dim'],
-            "enc_layers": 4,
-            "enc_dropout": 0}
-        params.update(encoder_params)
-        get_encoder = get_sbm_gated_gcn_dgl_encoder
-        data_lib = "dgl"
+    # elif args.encoder_type == "gatedgcn":
+    #     encoder_params = {
+    #         "enc_in_dim": 20,  # orignal_feature + random_feature or pos_enc dim
+    #         "enc_hidden_dim": 128,
+    #         "enc_out_dim": params['e_dim'],
+    #         "enc_layers": 4,
+    #         "enc_dropout": 0}
+    #     params.update(encoder_params)
+    #     get_encoder = get_sbm_gated_gcn_dgl_encoder
+    #     data_lib = "dgl"
     else:
         raise ValueError("Unknown encoder type: " + args.encoder_type)
 
