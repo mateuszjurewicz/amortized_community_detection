@@ -8,7 +8,7 @@ import argparse
 import time
 import importlib
 
-import torch_geometric
+# import torch_geometric
 import dgl
 
 from sklearn.metrics import adjusted_mutual_info_score
@@ -139,12 +139,12 @@ def main():
         labels_np = labels.cpu().numpy()
         N = labels_np.shape[0]
 
-        if isinstance(data, torch_geometric.data.Data):
-            features = data.x
-            edge_index = data.edge_index
-        elif isinstance(data, dgl.DGLGraph):
+        if isinstance(data, dgl.DGLGraph):
             features = data.ndata['feat']
             edge_index = torch.stack(data.all_edges())
+        # elif isinstance(data, torch_geometric.data.Data):
+        #     features = data.x
+        #     edge_index = data.edge_index
         else:
             raise ValueError("Unknown data type")
 
