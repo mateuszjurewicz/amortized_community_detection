@@ -172,9 +172,7 @@ def train_acp():
 
         # TODO: adding generation of jagged batched, within Nmin and Nmax
         data, labels = data_generator.generate_batch_mixed(
-            batch_size=batch_size, data_lib=data_lib, device=device, n=random.randint(data_params['Nmin'],
-                                                                                      data_params['Nmax'])
-        )
+            batch_size=batch_size, data_lib=data_lib, device=device, n=random.randint(data_params['Nmin'], data_params['Nmax']))
 
         try:
             # if args.data_type in ["benchmarking_gnn"]:
